@@ -47,7 +47,7 @@ baseApp.use(
   })
 )
 
-const productionOrigins = ["https://teleb-furniture.com", "https://www.teleb-furniture.com", "http://localhost:3001", "http://localhost:3000"]
+const productionOrigins = ["https://teleb-furniture.com", "https://www.teleb-furniture.com"]
 
 const devOrigins = [...productionOrigins]
 

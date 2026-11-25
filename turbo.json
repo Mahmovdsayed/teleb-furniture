@@ -9,7 +9,7 @@
       "outputs": [".next/**", "!.next/cache/**", "!.next/dev/**"]
     },
     "dev": {
-      "cache": true,
+      "cache": false,
       "persistent": true
     },
     "lint": {
