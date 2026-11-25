@@ -7,13 +7,8 @@ const nextConfig: NextConfig = {
   reactCompiler: true,
   transpilePackages: ["@teleb/api-client", "@teleb/types", "@teleb/ui", "@teleb/utils", "@teleb/validations"],
   images: {
-    remotePatterns: [
-      {
-        protocol: "https",
-        hostname: "res.cloudinary.com",
-      },
-    ],
-    formats: ["image/webp"],
+    loader: "custom",
+    loaderFile: "./lib/cloudinary-loader.ts",
   },
   reactStrictMode: true,
   productionBrowserSourceMaps: false,
