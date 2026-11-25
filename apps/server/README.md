@@ -52,53 +52,6 @@ The server is organized into domain-specific modules, each owning its routes, co
 
 All routes are mounted under `/v1` with shared middleware for security, compression, rate limiting, and i18n applied globally.
 
-## Environment Variables
-
-Copy `.env.example` to `.env` and fill in the required values.
-
-| Variable | Description |
-|---|---|
-| `NODE_ENV` | `development` or `production` |
-| `PORT` | Server port (default: `8080`) |
-| `DATABASE_URL` | Neon PostgreSQL connection string |
-| `LOGIN_SIG` | Secret for login signature (min 16 chars) |
-| `JWT_SECRET` | Secret for JWT signing (min 16 chars) |
-| `REDIS_URL` | Redis connection URL |
-| `SMTP_HOST` | SMTP server hostname |
-| `SMTP_PORT` | SMTP port (default: `587`) |
-| `SMTP_SECURE` | Use TLS for SMTP (`true`/`false`) |
-| `SMTP_USER` | SMTP username |
-| `SMTP_PASSWORD` | SMTP password |
-| `MAIL_FROM` | Sender email address |
-| `ADMIN_EMAIL` | Admin notification email |
-| `CORS_ORIGIN` | Comma-separated allowed origins (optional) |
-| `COOKIE_DOMAIN` | Cookie domain override (optional) |
-| `LOAD_TEST_BYPASS_KEY` | Key to bypass rate limiting for load tests (optional) |
-
-## Getting Started
-
-**Prerequisites:** Bun, a PostgreSQL database (Neon), and a Redis instance.
-
-```bash
-# Install dependencies
-bun install
-
-# Run database migrations
-bun drizzle-kit migrate
-
-# Start the development server
-bun dev
-```
-
-The server starts on `http://localhost:8080` by default.
-
-## Scripts
-
-| Script | Description |
-|---|---|
-| `bun dev` | Start development server with hot reload |
-| `bun typecheck` | Run TypeScript type checking |
-
 ## API Base
 
 All endpoints are prefixed with `/v1`.

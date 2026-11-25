@@ -507,10 +507,17 @@ I have not included fabricated conversion rates, traffic growth, sales increases
 
 | Layer | Technologies |
 |---|---|
+| Repository | Turborepo monorepo, one git repository |
+| Package manager | Bun workspaces, single lockfile |
+| Shared packages | `@teleb/types`, `@teleb/validations`, `@teleb/ui`, `@teleb/utils`, `@teleb/config`, `@teleb/api-client` |
+| API communication | Hono RPC (`hc` with the server's inferred `AppType`) |
 | Frontend framework | Next.js 16 |
 | UI library | React 19 |
 | Language | TypeScript |
 | Styling | Tailwind CSS 4 |
+| UI system | shadcn/ui on Base UI, shared component package |
+| Forms | React Hook Form with Zod resolvers |
+| Validation | Zod schemas shared between the applications and the API |
 | Internationalization | `next-intl` |
 | Carousel | Swiper |
 | Backend runtime | Bun |
@@ -523,7 +530,45 @@ I have not included fabricated conversion rates, traffic growth, sales increases
 | AI workflow | `typesafe-ai/jev`, Vercel AI Gateway |
 | Deployment | Vercel and managed database infrastructure |
 
-## 19. Final Reflection
+## 19. Monorepo Architecture and Shared Packages
+
+I consolidated the storefront, the dashboard and the API into one Turborepo repository so the contract between
+them has a single home. Each application is a workspace, and the code they share sits in packages.
+
+| Workspace | Responsibility |
+|---|---|
+| `apps/client` | Customer storefront (Next.js 16) |
+| `apps/dashboard` | Administration dashboard (Next.js 16) |
+| `apps/server` | Hono API on Bun, deployed on Vercel |
+| `packages/types` | Entities, query inputs and response envelopes used by all three applications |
+| `packages/validations` | Zod schemas, inferred payload types and the locale-aware error map |
+| `packages/ui` | Shared components, hooks, design tokens and Tailwind entry stylesheet |
+| `packages/utils` | Framework-agnostic helpers |
+| `packages/config` | TypeScript, ESLint and Prettier presets |
+| `packages/api-client` | Typed Hono RPC client used by both Next.js applications |
+
+I derive the type safety across that boundary from the API implementation instead of maintaining it by hand.
+The server exports its inferred type, and the API client consumes it as a type only:
+
+```
+apps/server        export type AppType = typeof app
+packages/api-client  import type { AppType } from "@teleb/server"   (erased at build time)
+apps/*             const body = await readResponse(api.v1.products.$get({ query }))
+```
+
+The server package exposes only a `types` condition, so a runtime import from a frontend cannot resolve. That is
+how I keep server code out of the browser bundles.
+
+Validation works the same way. I define request schemas once, both apps validate forms with the schemas they
+submit, and Arabic and English draw their messages from one error map. I aligned timestamps, identifiers and
+nullability with what the API actually returns, so the shared types describe the wire format instead of an
+approximation of it.
+
+Moving to one repository also changed how I ship: a single lockfile, one install for every workspace, Turborepo
+tasks that build in dependency order, and three Vercel projects building from the same repository with their
+own root directories and environment variables.
+
+## 20. Final Reflection
 
 Teleb Furniture was an opportunity to approach web development as a product engineering problem rather than a page-building exercise.
 

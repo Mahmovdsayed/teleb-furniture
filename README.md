@@ -1,160 +1,120 @@
 # Teleb Furniture
 
-Turborepo monorepo for the Teleb storefront, admin dashboard and API.
+A freelance project I designed and built end to end: a bilingual furniture storefront, the administration
+dashboard behind it, and the API that powers both, kept together in one Turborepo monorepo with the packages
+they share.
+
+- Storefront: https://www.teleb-furniture.com/en
+- Case study: [apps/client/CASE_STUDY.md](apps/client/CASE_STUDY.md)
+
+## The brief
+
+Teleb Furniture sells furniture online and needed more than a template storefront. The products had to read as
+premium rather than as a catalog listing. The catalog keeps growing, so browsing had to stay organised. The
+business works in Arabic and English, so both languages had to feel native instead of translated. And the
+people running the shop needed to manage products, offers, banners and customer messages themselves.
+
+## What I built
+
+### The storefront
+
+The customer-facing side: product and collection browsing, product pages with galleries, promotional banners,
+time-limited offers, a contact flow, and SEO work that includes structured data, metadata, sitemap and robots.
+
+It is bilingual with Arabic and English routing, and fully RTL-aware. Reads are cached on the server so pages
+stay fast without going stale in the wrong places.
+
+### The administration dashboard
+
+The workspace the business uses day to day: managing the product catalog with images and variants, curating
+collections, publishing banners, configuring offers and campaigns, and working through the customer inbox with
+search, priority and viewed state, next to an analytics overview.
+
+The forms are typed end to end, validate with the same rules the API enforces, and report errors in whichever
+language the admin is using.
+
+### The API
+
+A Hono service on Bun, organised by domain (auth, products, collections, banners, offers, messages,
+analytics). It owns authentication, validation, data access through Drizzle on Neon, Redis caching with
+explicit invalidation, rate limiting, secure headers, request timeouts, email notifications, and a background
+queue that classifies incoming customer messages with AI so urgent ones surface first.
+
+### The shared foundation
+
+The three applications used to be three separate repositories. I merged them into one monorepo and moved
+everything they had in common into shared packages, so the contract between them lives in one place:
+
+| Package | What it holds |
+|---|---|
+| `@teleb/types` | Entities, query inputs and response envelopes used by all three applications |
+| `@teleb/validations` | Zod schemas, inferred payload types and the Arabic/English error map |
+| `@teleb/ui` | Shared components, hooks, design tokens and the Tailwind entry stylesheet |
+| `@teleb/utils` | Framework-agnostic helpers |
+| `@teleb/config` | TypeScript, ESLint and Prettier presets |
+| `@teleb/api-client` | The typed Hono RPC client both frontends call |
+
+## The decisions I would point to
+
+**The API owns the contract.** Instead of hand-written request types that drift, the server exports its
+inferred type and the client consumes it as a type only:
+
+```
+apps/server       export type AppType = typeof app
+@teleb/api-client import type { AppType } from "@teleb/server" (erased at build time)
+frontends         const body = await readResponse(api.v1.products.$get({ query }))
+```
+
+The server package exposes a types-only condition, so server code can never end up in a browser bundle.
+
+**One set of rules, two languages.** Forms on both sides validate with the same Zod schemas the API enforces,
+and Arabic and English draw their messages from one error map, including the specific Egyptian phone-number
+messages. I aligned identifiers, timestamps and nullability with what the API actually returns, so the shared
+types describe the wire format rather than an approximation of it.
+
+**One copy of everything shared.** Components, hooks and tokens live in one package; React, the class merger,
+the query client, the form library and the validation library resolve to a single instance across the
+workspace, which is what keeps contexts and caches coherent.
+
+**Caching where it matters.** The API caches in Redis and invalidates explicitly when content changes, and the
+storefront caches reads with its own cache lifetime, so a promotion appears when it should and not before.
+
+**Media handled properly.** Images are uploaded and processed through Cloudinary from the dashboard, with the
+storefront serving optimised, correctly sized assets.
+
+**Operational care.** Request IDs, structured logging, rate limits per route, secure headers, CORS rules, body
+limits and timeouts were part of the work, not an afterthought.
 
 ## Stack
 
-| Concern | Choice |
-| --- | --- |
-| Monorepo | Turborepo 2 (`turbo.json`, tasks in `tasks`) |
-| Package manager | Bun 1.4 workspaces, single root `bun.lock` |
-| Frontend | Next.js 16 (App Router, Turbopack) |
-| Backend | Hono 4 + Bun, deployed on Vercel |
-| UI | Tailwind CSS v4 + shadcn/ui (`base-mira`, `neutral`, RTL) |
-| Validation | Zod v4 |
-| API communication | Hono RPC (`hono/client` `hc<AppType>`) |
-| Language | TypeScript 7 |
+| Layer | What I used |
+|---|---|
+| Repository | Turborepo monorepo, Bun workspaces, one lockfile |
+| Storefront and dashboard | Next.js 16, React 19, TypeScript |
+| Styling and UI | Tailwind CSS 4, shadcn/ui on Base UI |
+| Internationalisation | next-intl with Arabic and English |
+| Forms and validation | React Hook Form, Zod |
+| Data fetching | TanStack Query, Hono RPC |
+| API | Bun, Hono |
+| Database | PostgreSQL on Neon, Drizzle ORM |
+| Caching | Redis |
+| Media | Cloudinary, Sharp |
+| AI | Vercel AI SDK and gateway |
+| Background work | Vercel Queue |
+| Email | Nodemailer |
+| Hosting | Vercel |
 
-## Structure
+## What this project demonstrates
 
-```text
-teleb-furniture/
-├── apps/
-│   ├── client/          # Next.js storefront (package name: teleb)
-│   ├── dashboard/       # Next.js admin dashboard (package name: dashboard)
-│   └── server/          # Hono + Bun API (@teleb/server)
-├── packages/
-│   ├── api-client/      # @teleb/api-client – typed Hono RPC client
-│   ├── config/          # @teleb/config – tsconfig / eslint / prettier presets
-│   ├── types/           # @teleb/types – shared types
-│   ├── ui/              # @teleb/ui – shadcn/ui foundation, tokens, global CSS
-│   ├── utils/           # @teleb/utils – shared helpers
-│   └── validations/     # @teleb/validations – shared Zod schemas
-├── bun.lock             # the only lockfile
-├── package.json         # workspaces: apps/*, packages/*
-└── turbo.json
-```
+- Taking a business requirement from design through frontend, backend, database and deployment.
+- Building bilingual, RTL-correct interfaces rather than bolting translation on at the end.
+- Designing a type boundary between frontend and backend that cannot silently drift.
+- Consolidating separate applications into a maintainable monorepo without breaking their behaviour.
+- Handling caching, media, background jobs and the operational details that keep a storefront reliable.
 
-## Getting started
+## Where to read more
 
-```bash
-bun install
-bun dev            # all apps (client :3000, dashboard falls back to :3001, server :8080)
-```
-
-Environment: `apps/server` needs its own `.env` (`DATABASE_URL`, `REDIS_URL`, `JWT_SECRET`,
-`SMTP_*`, …), and each Next app reads `NEXT_PUBLIC_API_URL` for the API origin
-(`http://localhost:8080` locally, `https://api.teleb-furniture.com` in production).
-
-## Commands
-
-```bash
-bun dev            # turbo run dev          (persistent, all apps)
-bun build          # turbo run build        (Next apps; @teleb/* need no build step)
-bun lint           # turbo run lint         (client, dashboard, @teleb/ui)
-bun typecheck      # turbo run typecheck    (every app and package)
-bun check-types    # alias for bun typecheck
-bun format         # prettier --write
-```
-
-Filtering with Turborepo:
-
-```bash
-bun dev --filter=teleb            # storefront only
-bun dev --filter=dashboard        # dashboard only
-bun dev --filter=@teleb/server    # API only
-bun build --filter=teleb...
-bun typecheck --filter=./packages/*
-```
-
-Convenience wrappers: `bun dev:client`, `bun dev:dashboard`, `bun dev:server`,
-`bun build:client`, `bun build:dashboard`.
-
-## Hono RPC
-
-`apps/server` is the source of truth for the API types:
-
-```ts
-// apps/server/src/index.ts
-const app = new Hono<AppEnv>().basePath("/v1").route("/products", productRoutes) /* … */;
-
-export type AppType = typeof app;
-export default app;
-```
-
-Route registration everywhere in the server is **chained** (`.get().post().patch()`), which is what
-makes `typeof app` carry every path, method, request input and response body.
-
-`@teleb/server` exposes that type through a **types-only** package export:
-
-```jsonc
-// apps/server/package.json
-"exports": { ".": { "types": "./src/index.ts" } }
-```
-
-```ts
-// packages/api-client/src/client.ts
-import { hc } from "hono/client"
-import type { AppType } from "@teleb/server"   // erased at build time
-
-export const api = hc<AppType>(getApiOrigin())
-```
-
-Usage in either Next app:
-
-```tsx
-import { api } from "@teleb/api-client"
-
-// routes are registered under the /v1 base path
-const response = await api.v1.products.$get({ query: { limit: 12, page: 1 } })
-
-if (response.ok) {
-  const data = await response.json() // typed from the server controller
-}
-```
-
-Why the runtime dependency is impossible:
-
-* the `@teleb/server` export declares **only** a `types` condition — a runtime `import` from it does
-  not resolve, so a bundler cannot accidentally include the server;
-* `@teleb/api-client` uses `import type`, which TypeScript and SWC strip;
-* the dependency edge is one-way (`api-client → server`); the server never imports a frontend package.
-
-## Shared packages
-
-| Package | Contents | Consumed by |
-| --- | --- | --- |
-| `@teleb/ui` | shadcn/ui foundation, `src/styles/globals.css` tokens, `cn()` | client, dashboard |
-| `@teleb/api-client` | `hc<AppType>` client + origin resolution | client, dashboard |
-| `@teleb/validations` | Zod schemas shared byte-for-byte between apps | client, dashboard, server |
-| `@teleb/types` | types identical across apps (`Banner*`, `ApiResponse`) | client, dashboard |
-| `@teleb/utils` | `formatDate`, `ConfettiFireworks` | client, dashboard |
-| `@teleb/config` | tsconfig/eslint/prettier presets | all `packages/*` |
-
-Each package's README documents exactly what was shared and what deliberately stayed app-local
-(entities whose client/dashboard/server shapes disagree are **not** merged).
-
-### UI / Tailwind / shadcn
-
-* shadcn components are installed into `packages/ui` (`bunx shadcn@latest add <component>` run from an
-  app). Both apps' `components.json` point `ui` → `@teleb/ui/components` and `utils` →
-  `@teleb/ui/lib/utils`.
-* Components are imported through the package export map, e.g.
-  `import { Button } from "@teleb/ui/components/button"`.
-* Tailwind scans the package via `@source "../**/*.{ts,tsx}"` in
-  `packages/ui/src/styles/globals.css`; each app's `app/globals.css` imports
-  `@teleb/ui/globals.css` and keeps only app-specific styles (font variables, client view transitions).
-* Both Next apps list the `@teleb/*` packages in `transpilePackages`.
-
-## Deployment notes (Vercel)
-
-* The two Next apps deploy as usual; both import workspace packages that ship raw TypeScript, which
-  Turbopack transpiles (they are also listed in `transpilePackages`).
-* `apps/server` keeps its existing Hono + Bun setup (`vercel.json` with `bunVersion`, the
-  `contact-classification` queue function, `Bun.serve` in `src/server.ts`). No build script or deploy
-  behaviour was added.
-* **Check on the server project:** it now imports `@teleb/validations` at runtime, so the Vercel build
-  must see the workspace root. If the project's Root Directory is `apps/server` with an isolated
-  install, set the Root Directory to the repository root (or add
-  `"functions": { "queues/contact-classification.ts": { "includeFiles": "../../packages/**" } }`) and
-  verify a preview deployment.
+- Full case study: [apps/client/CASE_STUDY.md](apps/client/CASE_STUDY.md)
+- Storefront: [apps/client/README.md](apps/client/README.md)
+- Dashboard: [apps/dashboard/README.md](apps/dashboard/README.md)
+- API: [apps/server/README.md](apps/server/README.md)
