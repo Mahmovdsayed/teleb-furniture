@@ -1,7 +1,11 @@
 export const DEFAULT_API_ORIGIN = "https://api.teleb-furniture.com"
-// export const API_ORIGIN_ENV_VAR = "http://localhost:8080"
 
 export function getApiOrigin(override?: string): string {
-  const raw = override ?? DEFAULT_API_ORIGIN
-  return raw.replace(/\/+$/, "")
+  if (override) return override.replace(/\/+$/, "")
+
+  if (typeof window === "undefined" && process.env.API_URL) {
+    return process.env.API_URL.replace(/\/+$/, "")
+  }
+
+  return (process.env.NEXT_PUBLIC_API_URL ?? DEFAULT_API_ORIGIN).replace(/\/+$/, "")
 }

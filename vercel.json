@@ -1,0 +1,47 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "bunVersion": "1.x",
+  "services": {
+    "client": {
+      "root": "apps/client",
+      "framework": "nextjs",
+      "installCommand": "cd ../.. && bun install --frozen-lockfile",
+      "buildCommand": "cd ../.. && bun run build --filter=teleb",
+      "bindings": [{ "type": "service", "service": "server", "format": "url", "env": "API_URL" }]
+    },
+    "dashboard": {
+      "root": "apps/dashboard",
+      "framework": "nextjs",
+      "installCommand": "cd ../.. && bun install --frozen-lockfile",
+      "buildCommand": "cd ../.. && bun run build --filter=dashboard",
+      "bindings": [{ "type": "service", "service": "server", "format": "url", "env": "API_URL" }]
+    },
+    "server": {
+      "root": "apps/server",
+      "framework": "hono",
+      "installCommand": "cd ../.. && bun install --frozen-lockfile",
+      "functions": {
+        "queues/contact-classification.ts": {
+          "experimentalTriggers": [{ "type": "queue/v2beta", "topic": "contact-classification" }],
+          "includeFiles": "../../packages/**"
+        },
+        "src/server.ts": {
+          "includeFiles": "../../packages/**"
+        }
+      }
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "has": [{ "type": "host", "value": { "pre": "api." } }],
+      "destination": { "service": "server" }
+    },
+    {
+      "source": "/(.*)",
+      "has": [{ "type": "host", "value": { "pre": "dashboard." } }],
+      "destination": { "service": "dashboard" }
+    },
+    { "source": "/(.*)", "destination": { "service": "client" } }
+  ]
+}
