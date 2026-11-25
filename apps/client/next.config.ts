@@ -7,13 +7,8 @@ const nextConfig: NextConfig = {
   reactCompiler: true,
   transpilePackages: ["@teleb/api-client", "@teleb/types", "@teleb/ui", "@teleb/utils", "@teleb/validations"],
   images: {
-    remotePatterns: [
-      {
-        protocol: "https",
-        hostname: "res.cloudinary.com",
-      },
-    ],
-    formats: ["image/webp"],
+    loader: "custom",
+    loaderFile: "./lib/cloudinary-loader.ts",
   },
   reactStrictMode: true,
   productionBrowserSourceMaps: false,
@@ -30,9 +25,6 @@ const nextConfig: NextConfig = {
     removeConsole: true,
   },
   partialPrefetching: true,
-  // apps/client is its own Git repository inside the monorepo, so Turbopack would
-  // otherwise treat this directory as the workspace root and refuse to resolve
-  // node_modules/next (hoisted to the monorepo root by the shared install).
   turbopack: {
     root: path.resolve(process.cwd(), "..", ".."),
     rules: {
