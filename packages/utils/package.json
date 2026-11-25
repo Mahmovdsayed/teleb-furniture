@@ -1,0 +1,22 @@
+{
+  "name": "@teleb/utils",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./format-date": "./src/format-date.ts",
+    "./confetti-fireworks": "./src/confetti-fireworks.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "canvas-confetti": "^1.9.4"
+  },
+  "devDependencies": {
+    "@teleb/config": "workspace:*",
+    "@types/canvas-confetti": "^1.9.0",
+    "typescript": "^7.0.2"
+  }
+}

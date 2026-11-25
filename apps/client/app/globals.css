@@ -1,0 +1,104 @@
+@import "@teleb/ui/globals.css";
+
+@theme inline {
+  --font-montserrat: var(--font-montserrat-family);
+  --font-cairo: var(--font-cairo-family);
+}
+
+@layer base {
+  html {
+    font-family: var(--font-montserrat-family), sans-serif;
+  }
+
+  html[dir="rtl"] {
+    font-family: var(--font-cairo-family), sans-serif;
+  }
+}
+
+:root {
+  --duration-exit: 100ms;
+  --duration-enter: 180ms;
+  --duration-move: 300ms;
+}
+
+@keyframes vt-blur-in {
+  from {
+    opacity: 0;
+    transform: scale(0.995);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes vt-blur-out {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  to {
+    opacity: 0;
+    transform: scale(1.005);
+  }
+}
+
+::view-transition {
+  pointer-events: none;
+  direction: ltr;
+}
+
+::view-transition-old(root) {
+  display: none;
+}
+
+::view-transition-new(root) {
+  animation: none;
+}
+
+::view-transition-group(site-navbar) {
+  animation: none;
+  z-index: 100;
+}
+
+::view-transition-old(site-navbar) {
+  display: none;
+}
+
+::view-transition-new(site-navbar) {
+  animation: none;
+}
+
+::view-transition-old(.page-exit) {
+  animation: var(--duration-exit) ease-in both vt-blur-out;
+}
+
+::view-transition-new(.page-enter) {
+  animation: var(--duration-enter) ease-out var(--duration-exit) both vt-blur-in;
+}
+
+::view-transition-group(.morph) {
+  animation-duration: var(--duration-move);
+  animation-timing-function: cubic-bezier(0.2, 0, 0, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(*),
+  ::view-transition-new(*),
+  ::view-transition-group(*) {
+    animation-duration: 0s !important;
+    animation-delay: 0s !important;
+  }
+}
+
+html[dir="rtl"] {
+  view-transition-name: none;
+}
+
+html[dir="rtl"]::view-transition-old(*),
+html[dir="rtl"]::view-transition-new(*),
+html[dir="rtl"]::view-transition-group(*) {
+  animation: none !important;
+}

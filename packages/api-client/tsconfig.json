@@ -1,0 +1,11 @@
+{
+  "extends": "@teleb/config/tsconfig/react-library.json",
+  "compilerOptions": {
+    "types": ["bun"],
+    "paths": {
+      "@teleb/*": ["../*"]
+    }
+  },
+  "include": ["src"],
+  "exclude": ["node_modules"]
+}

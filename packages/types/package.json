@@ -1,0 +1,25 @@
+{
+  "name": "@teleb/types",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./analytics": "./src/analytics.ts",
+    "./api": "./src/api.ts",
+    "./auth": "./src/auth.ts",
+    "./banner": "./src/banner.ts",
+    "./collection": "./src/collection.ts",
+    "./common": "./src/common.ts",
+    "./message": "./src/message.ts",
+    "./offer": "./src/offer.ts",
+    "./product": "./src/product.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@teleb/config": "workspace:*",
+    "typescript": "^7.0.2"
+  }
+}

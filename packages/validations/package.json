@@ -1,0 +1,32 @@
+{
+  "name": "@teleb/validations",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./auth": "./src/auth.ts",
+    "./banner": "./src/banner.ts",
+    "./collection": "./src/collection.ts",
+    "./errors": "./src/errors.ts",
+    "./image": "./src/image.ts",
+    "./image-constants": "./src/image-constants.ts",
+    "./image-messages": "./src/image-messages.ts",
+    "./message": "./src/message.ts",
+    "./offer": "./src/offer.ts",
+    "./product": "./src/product.ts",
+    "./product-form": "./src/product-form.ts",
+    "./storefront": "./src/storefront.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@teleb/types": "workspace:*",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@teleb/config": "workspace:*",
+    "typescript": "^7.0.2"
+  }
+}

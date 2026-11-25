@@ -1,0 +1,100 @@
+import { z } from "zod"
+
+export const collectionRowSchema = z.compile(
+  z.object({
+    id: z.number().int().positive(),
+    arName: z.string().min(1),
+    enName: z.string().min(1),
+    icon: z.string().nullable().optional(),
+    createdAt: z.string().optional(),
+    updatedAt: z.string().optional(),
+  })
+)
+
+export const collectionRowResponseSchema = z.compile(
+  z.object({
+    success: z.boolean(),
+    data: z.array(collectionRowSchema).optional(),
+    message: z.string().optional(),
+  })
+)
+
+export type CollectionRowSchema = z.infer<typeof collectionRowSchema>
+
+export const productSearchQuerySchema = z.compile(
+  z.object({
+    q: z.string().trim().min(1),
+    page: z.number().int().min(1).default(1),
+    limit: z.number().int().min(1).max(100).default(5),
+    lang: z.enum(["ar", "en"]).optional(),
+  })
+)
+
+export const productImageRowSchema = z.compile(
+  z.object({
+    id: z.number().optional(),
+    productId: z.number().optional(),
+    url: z.string().url(),
+    publicId: z.string().optional(),
+    order: z.number().optional(),
+    isMain: z.boolean().optional(),
+  })
+)
+
+export const productTranslationRowSchema = z.compile(
+  z.object({
+    id: z.number().optional(),
+    productId: z.number().optional(),
+    locale: z.enum(["ar", "en"]),
+    name: z.string().min(1),
+    description: z.string().nullable().optional(),
+    smallDescription: z.string().nullable().optional(),
+    tags: z.array(z.string()).optional(),
+  })
+)
+
+export const productRowSchema = z.compile(
+  z.object({
+    id: z.number().int().positive(),
+    collectionId: z.number().optional(),
+    offerId: z.number().nullable().optional(),
+    slug: z.string(),
+    status: z.enum(["active", "inactive"]),
+    isBestSeller: z.boolean().optional(),
+    isCustomizable: z.boolean().optional(),
+    translations: z.array(productTranslationRowSchema).optional(),
+    images: z.array(productImageRowSchema).optional(),
+  })
+)
+
+export const searchProductsResponseSchema = z.compile(
+  z.object({
+    success: z.boolean(),
+    data: z.array(productRowSchema).optional(),
+    total: z.number().optional(),
+    message: z.string().optional(),
+  })
+)
+
+export const getProductsFilterSchema = z.compile(
+  z.object({
+    page: z.coerce.number().int().min(1).default(1),
+    limit: z.coerce.number().int().min(1).max(100).default(12),
+    collectionId: z.coerce.number().int().positive().optional(),
+    offerId: z.coerce.number().int().positive().optional(),
+    status: z.enum(["active", "inactive"]).optional(),
+    bestSeller: z.preprocess((val) => {
+      if (val === "true" || val === true) return true
+      if (val === "false" || val === false) return false
+      return undefined
+    }, z.boolean().optional()),
+    sort: z.enum(["createdAt", "name"]).optional(),
+    order: z.enum(["asc", "desc"]).optional(),
+    search: z.string().trim().optional(),
+    lang: z.enum(["ar", "en"]).optional(),
+  })
+)
+
+export type ProductSearchQueryInput = z.infer<typeof productSearchQuerySchema>
+export type ProductRowSchema = z.infer<typeof productRowSchema>
+export type GetProductsFilterInput = z.infer<typeof getProductsFilterSchema>

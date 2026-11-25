@@ -1,14 +1,22 @@
 {
   "name": "teleb-furniture",
   "private": true,
+  "packageManager": "bun@1.4.2",
   "scripts": {
     "build": "turbo run build",
     "dev": "turbo run dev",
     "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck",
+    "check-types": "turbo run typecheck",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
-    "check-types": "turbo run check-types"
+    "dev:client": "turbo run dev --filter=teleb",
+    "dev:dashboard": "turbo run dev --filter=dashboard",
+    "dev:server": "turbo run dev --filter=@teleb/server",
+    "build:client": "turbo run build --filter=teleb",
+    "build:dashboard": "turbo run build --filter=dashboard"
   },
   "devDependencies": {
+    "@teleb/config": "workspace:*",
     "prettier": "3.9.6",
     "turbo": "^2.11.13",
     "typescript": "7.0.2"

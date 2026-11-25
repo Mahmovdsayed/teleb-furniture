@@ -1,0 +1,19 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "bunVersion": "1.x",
+  "functions": {
+    "queues/contact-classification.ts": {
+      "experimentalTriggers": [
+        {
+          "type": "queue/v2beta",
+          "topic": "contact-classification"
+        }
+      ],
+      "includeFiles": "../../packages/**"
+    },
+    "src/server.ts": {
+      "includeFiles": "../../packages/**"
+    }
+  },
+  "installCommand": "cd ../.. && bun install --frozen-lockfile"
+}
